@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct 10 21:12:08 2019
+
+@author: Bird L
+"""
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+import numpy as np
+np.random.seed(7)
+dataset = np.loadtxt('D:/machine/dl/pima-indians-diabetes.csv', delimiter = ',')
+X = dataset[:, 0 : 8]
+Y = dataset[:, 8]
+###创建模型
+model = Sequential()
+model.add(Dense(12, input_dim = 8, activation = 'relu'))
+model.add(Dense(8, activation = 'relu'))
+model.add(Dense(1, activation = 'sigmoid'))
+###模型编译
+###在模型编译时，需要指定用于评估一组权重的loss，用于搜索网络不同权重的optimizer
+###以及希望在模型训练期间收集和报告的可选指标
+###此处使用二进制交叉熵作为loss，梯度下降算法Adam作为优化器，分类准确度作为模型度量标准
+model.compile(loss = 'binary_crossentropy', optimizer = 'adam', metrics = ['accuracy'])
+###训练模型，通过调用模型的.fit函数实现
+###epochs参数控制迭代次数，batch_size指定每次权重更新所用的实例个数，这两个参数可以调节
+model.fit(x = X, y = Y, epochs = 150, batch_size = 10)
+###评估模型
+scores = model.evaluate(x = X, y = Y)
+print('\n%s : %.2f%%' % (model.metrics_names[1], scores[1]*100))
