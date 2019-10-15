@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Oct 15 20:45:33 2019
+
+@author: Bird L
+"""
+
+import tensorflow as tf
+from tensorflow import keras
+
+###首先设置模型的输入和hidden layer以及hiddenlayer中的细节，包括神经元个数和激活函数
+###还有系数初始化方案和正则化方案
+model = keras.Sequential()
+model.add(keras.layers.Dense(128, activation = 'sigmoid', 
+                             kernel_initializer = 'orthogonal',
+                             kernel_regularizer = 'l1'))
+###对于激活函数和初始化（默认使用Glorot uniform），正则化方案的选择方法二：
+model.add(keras.layers.Dense(128, activation = tf.keras.activations.sigmoid,
+                             kernel_inintializer = tf.keras.initializers.Constant(2.0),
+                             kernel_regularizer = tf.keras.regularizers.l1(0.01)))
+###要对偏置项进行初始化和正则化时，也同 kernel,小括号里可以指定参数，默认不正则化
+model.add(keras.layers.Dense(10, activation = 'softmax'))
+
+###通过compile方法配置模型的学习流程,包括通过optimizer选择优化器，loss指定损失函数，metrics指定模型评价参数，其中metrics的输入是一个列表
+model.compile(optimizer = 'adam',
+              loss = 'categorical-crossentropy',
+              metric = ['accuracy'])
+###这仨参数的指定也可以同上，使用
+model.compile(optimizer = tf.keras.optimizers.Adam(0.01),
+              loss = tf.keras.losses.CategoricalCrossentropy(),
+              metric = [tf.keras.metrics.CategoricalAccuracy()])
+###输入数据训练方法1
+model.fit(train_x, train_y, epochs =10, batch_size = 100, validation_data = (val_x, val_y))
+###输入数据训练方法二：（用tf.data导入数据，可用于分布式训练）
+dataset = tf.data.Dataset.from_tensor_slices((train_x, train_y))
+dataset = dataset.batch(32)
+dataset = dataset.repeat()
+val_dataset = tf.data.Dataset.from_tensor_slices((val_x, val_y))
+val_dataset = val_dataset.batch(32)
+val_dataset = val_dataset.repeat()
+model.fit(dataset, epochs = 10, step_per_epoch = 30, 
+           validation_data = val_dataset, validation_steps = 3)
+###评估1
+model.evaluate(test_x, test_y, batchsize = 32)
+##评估2
+test_dataset = tf.data.Dataset.from_tensor_slices((test_x, test_y))
+test_dataset = dataset.batch(32).repeat()
+model.evaluate(test_dataset, steps = 30)
+###可以看出使用方法二的好处就是，不用区分特征和label
+###预测
+resault = model.pridict(test_x, batch_size = 32 )
