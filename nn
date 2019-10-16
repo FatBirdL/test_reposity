@@ -25,7 +25,7 @@ model.add(keras.layers.Dense(10, activation = 'softmax'))
 model.compile(optimizer = 'adam',
               loss = 'categorical-crossentropy',
               metric = ['accuracy'])
-###这仨参数的指定也可以同上，使用
+###这仨参数的指定也可以同上，使用大写加小括号，小括号里面可以传入参数
 model.compile(optimizer = tf.keras.optimizers.Adam(0.01),
               loss = tf.keras.losses.CategoricalCrossentropy(),
               metric = [tf.keras.metrics.CategoricalAccuracy()])
@@ -35,6 +35,7 @@ model.fit(train_x, train_y, epochs =10, batch_size = 100, validation_data = (val
 dataset = tf.data.Dataset.from_tensor_slices((train_x, train_y))
 dataset = dataset.batch(32)
 dataset = dataset.repeat()
+###repeat是为了打乱样本顺序，然后随机组成一个batch用于训练
 val_dataset = tf.data.Dataset.from_tensor_slices((val_x, val_y))
 val_dataset = val_dataset.batch(32)
 val_dataset = val_dataset.repeat()
